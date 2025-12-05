@@ -52,7 +52,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/lovmig">
           <Routes>
             <Route path="/setup" element={<Setup />} />
             <Route path="/*" element={

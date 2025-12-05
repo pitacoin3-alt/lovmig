@@ -17,8 +17,8 @@ const getConfig = () => {
     };
   }
   return {
-    url: DEFAULT_SUPABASE_URL,
-    key: DEFAULT_SUPABASE_KEY
+    url: DEFAULT_SUPABASE_URL || '',
+    key: DEFAULT_SUPABASE_KEY || ''
   };
 };
 
@@ -27,26 +27,45 @@ const config = getConfig();
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export let supabase: SupabaseClient<Database> = createClient<Database>(config.url, config.key, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+let supabase: SupabaseClient<Database>;
 
-// Function to reinitialize client after config change
-export const reinitializeSupabaseClient = () => {
-  const newConfig = getConfig();
-  supabase = createClient<Database>(newConfig.url, newConfig.key, {
+// Create client only if we have valid credentials
+if (config.url && config.key) {
+  supabase = createClient<Database>(config.url, config.key, {
     auth: {
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
     }
   });
+} else {
+  // Create a dummy client with placeholder values to prevent errors
+  supabase = createClient<Database>('https://placeholder.supabase.co', 'placeholder-key', {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  });
+}
+
+// Function to reinitialize client after config change
+export const reinitializeSupabaseClient = () => {
+  const newConfig = getConfig();
+  if (newConfig.url && newConfig.key) {
+    supabase = createClient<Database>(newConfig.url, newConfig.key, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    });
+  }
   return supabase;
 };
+
+// Export the client
+export { supabase };
 
 // Check if using custom config
 export const isUsingCustomConfig = () => {
